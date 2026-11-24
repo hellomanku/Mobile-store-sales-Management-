@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Authentication Suite • Mayank Sahu Mobile Store</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* Dedicated Standalone Auth Portal Layout Styling */
+    .auth-standalone-layout {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at 10% 20%, #0f172a 0%, #1e293b 60%, #0f2744 100%);
+      color: #f8fafc;
+    }
+
+    .auth-top-header {
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(10px);
+    }
+
+    .auth-top-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .auth-top-brand h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0;
+    }
+
+    .auth-top-brand span {
+      font-size: 0.78rem;
+      color: #94a3b8;
+    }
+
+    .auth-main-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 32px;
+      max-width: 1200px;
+      width: 100%;
+      margin: 32px auto;
+      padding: 0 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 992px) {
+      .auth-main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .auth-card-container {
+      display: flex;
+      justify-content: center;
+    }
+
+    .auth-card-container .login-central-card {
+      margin: 0;
+      color: #1e293b;
+    }
+
+    /* Virtual Phone SMS Simulator Widget */
+    .sms-phone-simulator {
+      background: #1e293b;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .sms-sim-notch {
+      width: 100px;
+      height: 14px;
+      background: #0f172a;
+      border-radius: 0 0 10px 10px;
+      margin: -24px auto 16px auto;
+    }
+
+    .sms-sim-screen {
+      background: #0f172a;
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sms-sim-status-bar {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: #94a3b8;
+      margin-bottom: 16px;
+    }
+
+    .sms-message-bubble {
+      background: #2563eb;
+      color: #ffffff;
+      padding: 12px 16px;
+      border-radius: 16px 16px 4px 16px;
+      font-size: 0.85rem;
+      line-height: 1.45;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      animation: bubblePop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes bubblePop {
+      from { opacity: 0; transform: translateY(10px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .sms-bubble-time {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.75);
+      text-align: right;
+      margin-top: 6px;
+    }
+
+    .accounts-live-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 0.78rem;
+    }
+
+    .accounts-live-table th {
+      text-align: left;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #94a3b8;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .accounts-live-table td {
+      padding: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      color: #e2e8f0;
+    }
+
+    .accounts-live-table tr:hover td {
+      background: rgba(255, 255, 255, 0.04);
+    }
+  </style>
+</head>
+
+<body class="auth-standalone-layout">
+
+  <!-- ==============================================================================
+       TOP HEADER
+       ============================================================================== -->
+  <header class="auth-top-header">
+    <div class="auth-top-brand">
+      <span style="font-size: 1.6rem;">📱</span>
+      <div>
+        <h1>Mayank Sahu Mobile Store — Authentication Suite</h1>
+        <span>Mobile Number-Based Authentication • SMS OTP Gateway • Registration &amp; Password Recovery</span>
+      </div>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <a href="index.html" class="btn btn-secondary" style="font-size: 0.82rem; padding: 6px 14px; color: #ffffff; border-color: rgba(255,255,255,0.2);">
+        🏬 Launch Full Mobile Store
+      </a>
+      <span class="college-badge-pill" style="margin-bottom: 0;">🎓 Final Year Project</span>
+    </div>
+  </header>
+
+  <!-- ==============================================================================
+       MAIN WORKSPACE GRID: AUTH CARD + VIRTUAL SMS DEVICE SIMULATOR
+       ============================================================================== -->
+  <main class="auth-main-grid">
+
+    <!-- LEFT COLUMN: AUTHENTICATION CARD (LOGIN, REGISTER, FORGOT PASSWORD) -->
+    <div class="auth-card-container">
+      <div class="login-central-card" style="box-shadow: 0 25px 60px rgba(0,0,0,0.5);">
+
+        <div class="login-project-header">
+          <span class="college-badge-pill">Mobile Authentication</span>
+          <h2 style="font-size: 1.45rem; color: var(--neutral-dark);">Account Access Portal</h2>
+          <p class="login-developer-credit">
+            Developed by: <strong>Mayank Sahu</strong> | Final Year Major Project
+          </p>
+        </div>
+
+        <!-- ====================================================================
+             VIEW 1: LOGIN (Password & Mobile OTP)
+             ==================================================================== -->
+        <div id="auth-view-login" class="auth-view active">
+          <!-- Role Selector -->
+          <div class="login-role-tabs">
+            <button type="button" class="login-role-tab active" data-role="manager" onclick="setLoginRole('manager')">
+              👔 Store Manager
+            </button>
+            <button type="button" class="login-role-tab" data-role="customer" onclick="setLoginRole('customer')">
+              👤 Customer Portal
+            </button>
+          </div>
+
+          <!-- Auth Mode Toggle -->
+          <div class="auth-mode-switcher">
+            <button type="button" class="auth-mode-btn active" data-mode="password" onclick="switchLoginMode('password')">
+              🔑 Password Login
+            </button>
+            <button type="button" class="auth-mode-btn" data-mode="otp" onclick="switchLoginMode('otp')">
+              📱 Mobile OTP Login
+            </button>
+          </div>
+
+          <!-- MODE A: Password Form -->
+          <div id="login-password-form-block">
+            <form onsubmit="event.preventDefault(); handleStandaloneLogin();" autocomplete="off">
+              <div class="form-group">
+                <label for="login-username">Username / Registered Mobile</label>
+                <input type="text" id="login-username" value="mayank" placeholder="e.g. mayank, 9876543210" required>
+              </div>
+
+              <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <label for="login-password" style="margin-bottom: 0;">Password</label>
+                  <a href="javascript:void(0)" class="auth-nav-link" style="font-size: 0.8rem;" onclick="switchAuthView('forgot')">
+                    Forgot Password?
+                  </a>
+                </div>
+                <div class="password-input-wrapper">
+                  <input type="password" id="login-password" value="admin123" placeholder="Enter password" required>
+                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('login-password', this)">
+                    👁️
+                  </button>
+                </div>
+              </div>
+
+              <div id="login-error-message" class="alert alert-danger" style="display: none;"></div>
+
+              <button type="submit" class="btn btn-primary btn-block" style="padding: 13px; font-size: 0.95rem;">
+                🔐 Sign In &amp; Proceed →
+              </button>
+            </form>
+          </div>
+
+          <!-- MODE B: OTP Form -->
+          <div id="login-otp-form-block" style="display: none;">
+            <form onsubmit="event.preventDefault(); handleStandaloneLogin();" autocomplete="off">
+              <div class="form-group">
+                <label for="login-otp-phone">Mobile Phone Number</label>
+                <div class="phone-input-with-action">
+                  <div class="phone-input-group">
+                    <span class="phone-prefix-pill">🇮🇳 +91</span>
+                    <input type="tel" id="login-otp-phone" maxlength="10" placeholder="10-digit mobile" value="9876543210">
+                  </div>
+                  <button type="button" class="btn-send-otp" id="btn-login-send-otp" onclick="sendLoginOTP(); updateSimScreen();">
+                    📲 Send OTP
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="login-otp-code">6-Digit Verification Code</label>
+                <input type="text" id="login-otp-code" class="otp-code-input" maxlength="6" placeholder="• • • • • •">
+                <div class="otp-resend-row">
+                  <span>Didn't receive code?</span>
+                  <button type="button" class="otp-resend-link" id="btn-resend-login-otp" onclick="sendLoginOTP(); updateSimScreen();">
+                    Resend OTP <span id="login-otp-timer"></span>
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block" style="padding: 13px; font-size: 0.95rem;">
+                📱 Verify OTP &amp; Sign In →
+              </button>
+            </form>
+          </div>
+
+          <!-- Quick Demo Buttons -->
+          <div class="auth-divider-with-text">
+            <span>Quick Fill For Testing</span>
+          </div>
+          <div class="auth-demo-grid">
+            <button type="button" class="btn-demo-quick" onclick="quickFillDemo('manager', 'password')">
+              <strong>👔 Manager (Password)</strong>
+              <span>mayank / admin123</span>
+            </button>
+            <button type="button" class="btn-demo-quick" onclick="quickFillDemo('customer', 'otp')">
+              <strong>📱 Customer (OTP)</strong>
+              <span>9876543210 (Rahul)</span>
+            </button>
+          </div>
+
+          <div class="auth-navigation-row" style="justify-content: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid #e2e8f0;">
+            <span>New customer? </span>
+            <a href="javascript:void(0)" class="auth-nav-link" style="margin-left: 6px;" onclick="switchAuthView('register')">
+              Create an Account →
+            </a>
+          </div>
+
+          <div id="login-role-hint" class="login-demo-helper-box" style="margin-top: 12px;">
+            <strong>Manager Access:</strong> Username: <code>mayank</code> | Password: <code>admin123</code>
+          </div>
+        </div>
+
+        <!-- ====================================================================
+             VIEW 2: REGISTRATION (Mobile OTP Verified)
+             ==================================================================== -->
+        <div id="auth-view-register" class="auth-view">
+          <div style="text-align: center; margin-bottom: 16px;">
+            <h3 style="font-size: 1.2rem; color: var(--neutral-dark);">Create Customer Account</h3>
+            <p style="font-size: 0.82rem; color: #64748b;">Includes instant Mobile Number OTP Verification</p>
+          </div>
+
+          <div id="reg-error-message" class="alert alert-danger" style="display: none;"></div>
+
+          <form onsubmit="event.preventDefault(); handleStandaloneRegister();" autocomplete="off">
+            <div class="form-group">
+              <label for="reg-fullname">Full Name *</label>
+              <input type="text" id="reg-fullname" placeholder="e.g. Amit Kumar Sharma" required>
+            </div>
+
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <label for="reg-phone" style="margin-bottom: 0;">Mobile Phone Number *</label>
+                <span id="reg-phone-status" style="font-size: 0.8rem; color: #64748b;">Verification Required</span>
+              </div>
+              <div class="phone-input-with-action">
+                <div class="phone-input-group">
+                  <span class="phone-prefix-pill">🇮🇳 +91</span>
+                  <input type="tel" id="reg-phone" maxlength="10" placeholder="10-digit mobile" required>
+                </div>
+                <button type="button" class="btn-send-otp" id="btn-reg-send-otp" onclick="sendRegisterOTP(); updateSimScreen();">
+                  📲 Send OTP
+                </button>
+              </div>
+            </div>
+
+            <div id="reg-otp-panel" class="otp-verification-panel" style="display: none;">
+              <label for="reg-otp-code" style="font-size: 0.82rem; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">
+                Enter 6-Digit SMS Verification Code:
+              </label>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="reg-otp-code" class="otp-code-input" maxlength="6" placeholder="• • • • • •" style="flex: 1;">
+                <button type="button" class="btn btn-primary" onclick="verifyRegisterOTP()" style="padding: 0 16px; font-size: 0.85rem; font-weight: 600;">
+                  Verify
+                </button>
+              </div>
+              <div class="otp-resend-row">
+                <span>Code expires in 5 minutes</span>
+                <button type="button" class="otp-resend-link" id="btn-resend-reg-otp" onclick="sendRegisterOTP(); updateSimScreen();">
+                  Resend OTP <span id="reg-otp-timer"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="reg-email">Email Address (Optional)</label>
+              <input type="email" id="reg-email" placeholder="e.g. amit.sharma@example.com">
+            </div>
+
+            <div class="form-group">
+              <label for="reg-password">Create Password *</label>
+              <div class="password-input-wrapper">
+                <input type="password" id="reg-password" placeholder="At least 6 characters" required oninput="checkPasswordStrength(this.value, 'reg-password-fill', 'reg-password-label')">
+                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('reg-password', this)">
+                  👁️
+                </button>
+              </div>
+              <div class="password-strength-container">
+                <div class="password-strength-bar">
+                  <div id="reg-password-fill" class="password-strength-fill"></div>
+                </div>
+                <div id="reg-password-label" class="password-strength-label">
+                  <span>Enter at least 6 characters</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="reg-confirm-password">Confirm Password *</label>
+              <div class="password-input-wrapper">
+                <input type="password" id="reg-confirm-password" placeholder="Re-enter password" required>
+                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('reg-confirm-password', this)">
+                  👁️
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" style="padding: 13px; font-size: 0.95rem; margin-top: 8px;">
+              ✨ Complete Registration →
+            </button>
+          </form>
+
+          <div class="auth-navigation-row" style="justify-content: center; margin-top: 14px;">
+            <span>Already registered? </span>
+            <a href="javascript:void(0)" class="auth-nav-link" style="margin-left: 6px;" onclick="switchAuthView('login')">
+              Sign In Here
+            </a>
+          </div>
+        </div>
+
+        <!-- ====================================================================
+             VIEW 3: FORGOT PASSWORD (3-Step Mobile Recovery)
+             ==================================================================== -->
+        <div id="auth-view-forgot" class="auth-view">
+          <div style="text-align: center; margin-bottom: 14px;">
+            <h3 style="font-size: 1.2rem; color: var(--neutral-dark);">Reset Password</h3>
+            <p style="font-size: 0.82rem; color: #64748b;">Recover account via registered mobile number</p>
+          </div>
+
+          <div class="forgot-step-indicator">
+            <div class="step-dot active" id="forgot-dot-1">1</div>
+            <div class="step-divider-line" id="forgot-line-1"></div>
+            <div class="step-dot" id="forgot-dot-2">2</div>
+            <div class="step-divider-line" id="forgot-line-2"></div>
+            <div class="step-dot" id="forgot-dot-3">3</div>
+          </div>
+
+          <div id="forgot-error-message" class="alert alert-danger" style="display: none;"></div>
+
+          <!-- Step 1 -->
+          <div id="forgot-step-1">
+            <form onsubmit="event.preventDefault(); sendForgotOTP(); updateSimScreen();" autocomplete="off">
+              <div class="form-group">
+                <label for="forgot-phone">Registered Mobile Phone Number</label>
+                <div class="phone-input-group">
+                  <span class="phone-prefix-pill">🇮🇳 +91</span>
+                  <input type="tel" id="forgot-phone" maxlength="10" placeholder="e.g. 9876543210" required>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block" style="padding: 12px; font-size: 0.95rem;">
+                📲 Send Reset OTP →
+              </button>
+            </form>
+          </div>
+
+          <!-- Step 2 -->
+          <div id="forgot-step-2" style="display: none;">
+            <form onsubmit="event.preventDefault(); verifyForgotOTP();" autocomplete="off">
+              <div class="form-group">
+                <label for="forgot-otp-code">
+                  Enter Code sent to <strong id="forgot-sent-phone-label">+91 ••••• •••••</strong>
+                </label>
+                <input type="text" id="forgot-otp-code" class="otp-code-input" maxlength="6" placeholder="• • • • • •" required>
+                <div class="otp-resend-row">
+                  <span>Valid for 5 mins</span>
+                  <button type="button" class="otp-resend-link" id="btn-resend-forgot-otp" onclick="sendForgotOTP(); updateSimScreen();">
+                    Resend OTP <span id="forgot-otp-timer"></span>
+                  </button>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn btn-secondary" onclick="switchForgotStep(1)" style="flex: 1;">
+                  ← Back
+                </button>
+                <button type="submit" class="btn btn-primary" style="flex: 2;">
+                  Verify Code →
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Step 3 -->
+          <div id="forgot-step-3" style="display: none;">
+            <form onsubmit="event.preventDefault(); doResetPassword(); renderLiveAccounts();" autocomplete="off">
+              <div class="form-group">
+                <label for="forgot-new-password">New Password</label>
+                <div class="password-input-wrapper">
+                  <input type="password" id="forgot-new-password" placeholder="At least 6 characters" required oninput="checkPasswordStrength(this.value, 'forgot-password-fill', 'forgot-password-label')">
+                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('forgot-new-password', this)">
+                    👁️
+                  </button>
+                </div>
+                <div class="password-strength-container">
+                  <div class="password-strength-bar">
+                    <div id="forgot-password-fill" class="password-strength-fill"></div>
+                  </div>
+                  <div id="forgot-password-label" class="password-strength-label">
+                    <span>Enter new password</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="forgot-confirm-password">Confirm New Password</label>
+                <div class="password-input-wrapper">
+                  <input type="password" id="forgot-confirm-password" placeholder="Re-enter password" required>
+                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('forgot-confirm-password', this)">
+                    👁️
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block" style="padding: 12px; font-size: 0.95rem;">
+                🔒 Save &amp; Return to Sign In →
+              </button>
+            </form>
+          </div>
+
+          <div class="auth-navigation-row" style="justify-content: center; margin-top: 14px;">
+            <a href="javascript:void(0)" class="auth-nav-link" onclick="switchAuthView('login')">
+              ← Return to Login
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: VIRTUAL MOBILE SMS SIMULATOR & LIVE DATABASE ACCOUNTS EXPLORER -->
+    <div>
+      <!-- Virtual Smartphone Screen Widget -->
+      <div class="sms-phone-simulator">
+        <div class="sms-sim-notch"></div>
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 1.2rem;">📱</span>
+            <strong style="font-size: 0.95rem; color: #ffffff;">Virtual Smartphone SMS Display</strong>
+          </div>
+          <span class="badge" style="background: rgba(37, 99, 235, 0.2); color: #93c5fd; font-size: 0.72rem; padding: 2px 8px; border-radius: 12px;">
+            Simulated GSM Gateway
+          </span>
+        </div>
+
+        <div class="sms-sim-screen" id="sim-screen-container">
+          <div class="sms-sim-status-bar">
+            <span>Jio 5G • 100%</span>
+            <span id="sim-clock">12:00 PM</span>
+          </div>
+
+          <div id="sim-messages-body" style="flex: 1; display: flex; flex-direction: column; justify-content: flex-end;">
+            <div style="text-align: center; color: #64748b; font-size: 0.8rem; margin: auto;">
+              📡 Waiting for outgoing OTP dispatch...<br>
+              <span style="font-size: 0.72rem; color: #475569;">Click "Send OTP" on any form to see simulated live SMS.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Accounts Database Console -->
+      <div style="background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 20px; margin-top: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h4 style="font-size: 0.92rem; color: #ffffff; margin: 0;">
+            👥 Registered Database Accounts
+          </h4>
+          <button type="button" class="btn btn-secondary" onclick="renderLiveAccounts()" style="font-size: 0.72rem; padding: 3px 8px;">
+            🔄 Refresh
+          </button>
+        </div>
+        <p style="font-size: 0.75rem; color: #94a3b8; margin: 4px 0 12px 0;">
+          Synced live with browser <code>localStorage</code>
+        </p>
+
+        <div style="overflow-x: auto;">
+          <table class="accounts-live-table">
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>Name / User</th>
+                <th>Mobile Number</th>
+                <th>Password</th>
+              </tr>
+            </thead>
+            <tbody id="live-accounts-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Floating Smartphone Push Notification Toast (Shared with auth.js) -->
+  <div id="sms-notification-toast"></div>
+
+  <!-- Scripts in dependency order -->
+  <script src="js/data.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+
+  <script>
+    // Live Clock for Phone Simulator
+    function updateClock() {
+      const now = new Date();
+      const str = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const clockEl = document.getElementById('sim-clock');
+      if (clockEl) clockEl.textContent = str;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Updates the Virtual Smartphone display with active OTP messages
+    function updateSimScreen() {
+      setTimeout(() => {
+        const body = document.getElementById('sim-messages-body');
+        if (!body) return;
+
+        if (SMSGateway.activeSession) {
+          const s = SMSGateway.activeSession;
+          const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+          body.innerHTML = `
+            <div class="sms-message-bubble">
+              <div style="font-weight: 700; margin-bottom: 4px; font-size: 0.78rem; color: #bfdbfe;">
+                SMS from MAYANK-STORE
+              </div>
+              <div>
+                Your verification OTP for <strong>${s.purpose}</strong> is:
+                <div style="font-size: 1.25rem; font-family: monospace; font-weight: 700; letter-spacing: 0.2em; margin: 4px 0; background: rgba(0,0,0,0.25); padding: 4px 8px; border-radius: 6px; display: inline-block;">
+                  ${s.otp}
+                </div>
+              </div>
+              <div style="font-size: 0.72rem; color: #bfdbfe; margin-top: 4px;">
+                Valid for 5 minutes. Do not share with anyone.
+              </div>
+              <div class="sms-bubble-time">${time} • Received</div>
+            </div>
+          `;
+        }
+      }, 100);
+    }
+
+    // Custom login handler for standalone page
+    function handleStandaloneLogin() {
+      doLogin();
+      // If user logged in and transitions to portal, on standalone page we provide clean feedback
+      if (currentLoggedInUser) {
+        alert(`🎉 Authentication Successful!\n\nWelcome ${currentLoggedInUser.name} (${currentLoggedInUser.role})!\nRedirecting to Mayank Sahu Mobile Store...`);
+        window.location.href = 'index.html';
+      }
+    }
+
+    // Custom register handler for standalone page
+    function handleStandaloneRegister() {
+      doRegister();
+      if (currentLoggedInUser) {
+        alert(`🎉 Registration Complete!\n\nWelcome to Mayank Sahu Mobile Store, ${currentLoggedInUser.name}!\nRedirecting to store...`);
+        window.location.href = 'index.html';
+      }
+    }
+
+    // Renders registered accounts into the Live Accounts Console
+    function renderLiveAccounts() {
+      const tbody = document.getElementById('live-accounts-tbody');
+      if (!tbody) return;
+
+      let html = '';
+
+      // Managers
+      if (DB.managers) {
+        DB.managers.forEach(m => {
+          html += `
+            <tr>
+              <td><span class="role-badge badge-manager" style="font-size: 0.68rem; padding: 2px 6px;">👔 Manager</span></td>
+              <td><strong>${m.name}</strong><br><span style="color:#94a3b8; font-size: 0.7rem;">(${m.username})</span></td>
+              <td><code>${m.phone || '9988776655'}</code></td>
+              <td><code>${m.password}</code></td>
+            </tr>
+          `;
+        });
+      }
+
+      // Customers
+      if (DB.customers) {
+        DB.customers.forEach(c => {
+          html += `
+            <tr>
+              <td><span class="role-badge badge-customer" style="font-size: 0.68rem; padding: 2px 6px;">👤 Customer</span></td>
+              <td><strong>${c.name}</strong></td>
+              <td><code>+91 ${c.phone}</code></td>
+              <td><code>${c.password}</code></td>
+            </tr>
+          `;
+        });
+      }
+
+      tbody.innerHTML = html;
+    }
+
+    // Render accounts on load
+    document.addEventListener('DOMContentLoaded', () => {
+      renderLiveAccounts();
+    });
+  </script>
+
+</body>
+
+</html>

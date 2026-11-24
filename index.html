@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Store &amp; Sales Management System — Mayank Sahu</title>
+
+  <!-- External Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+  <!-- ==============================================================================
+       1. PORTAL TOP NAVIGATION BAR (Visible Only After Successful Login)
+       ============================================================================== -->
+  <nav id="main-portal-nav" class="portal-navbar">
+    <div class="portal-brand-block">
+      <span class="portal-brand-logo">📱</span>
+      <div>
+        <span class="portal-brand-name">Mayank Sahu Mobile Store</span>
+        <span class="portal-academic-tag"></span>
+      </div>
+    </div>
+
+    <div class="portal-nav-right">
+      <div class="nav-user-info-box">
+        <span id="nav-user-badge">User</span>
+        <span id="nav-role-pill" class="role-badge">Role</span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()" title="Log out of system">
+        🚪 <span>Logout</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==============================================================================
+       2. LOGIN SCREEN 
+       ============================================================================== -->
+  <!-- ==============================================================================
+       2. LOGIN & AUTHENTICATION PORTAL (Login, Registration, Forgot Password)
+       Incorporating Mobile Number-Based Authentication (SMS OTP & Passwordless Login)
+       Architected & Developed by: Mayank Sahu
+       ============================================================================== -->
+  <div id="screen-login" class="login-screen-wrapper active app-screen">
+    <div class="login-central-card">
+      <div class="login-project-header">
+        <h1>Mayank Sahu Mobile Store</h1>
+        <p class="login-developer-credit">
+          Intelligent Sales, Inventory &amp; Authentication System • Developed by: <strong>Mayank Sahu</strong>
+        </p>
+      </div>
+
+      <!-- ======================================================================
+           VIEW 1: LOGIN INTERFACE (Password Login & Mobile OTP Login)
+           ====================================================================== -->
+      <div id="auth-view-login" class="auth-view active">
+        <!-- Role Selection Switcher -->
+        <div class="login-role-tabs">
+          <button type="button" class="login-role-tab active" data-role="manager" onclick="setLoginRole('manager')">
+            👔 Store Manager
+          </button>
+          <button type="button" class="login-role-tab" data-role="customer" onclick="setLoginRole('customer')">
+            👤 Customer Portal
+          </button>
+        </div>
+
+        <!-- Authentication Mode Switcher: Password vs Mobile OTP -->
+        <div class="auth-mode-switcher">
+          <button type="button" class="auth-mode-btn active" data-mode="password" onclick="switchLoginMode('password')">
+            🔑 Password Login
+          </button>
+          <button type="button" class="auth-mode-btn" data-mode="otp" onclick="switchLoginMode('otp')">
+            📱 Mobile OTP Login
+          </button>
+        </div>
+
+        <!-- MODE A: Password Authentication Form -->
+        <div id="login-password-form-block">
+          <form onsubmit="event.preventDefault(); doLogin();" autocomplete="off">
+            <div class="form-group">
+              <label for="login-username">Username / Customer Mobile / Name</label>
+              <input type="text" id="login-username" value="mayank" placeholder="e.g. mayank, 9876543210, or Rahul"
+                required>
+            </div>
+
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <label for="login-password" style="margin-bottom: 0;">Password</label>
+                <a href="javascript:void(0)" class="auth-nav-link" style="font-size: 0.8rem;"
+                  onclick="switchAuthView('forgot')">
+                  Forgot Password?
+                </a>
+              </div>
+              <div class="password-input-wrapper">
+                <input type="password" id="login-password" value="admin123" placeholder="Enter password" required>
+                <button type="button" class="password-toggle-btn" title="Toggle password visibility"
+                  onclick="togglePasswordVisibility('login-password', this)">
+                  👁️
+                </button>
+              </div>
+            </div>
+
+            <!-- Dynamic Error Feedback Banner -->
+            <div id="login-error-message" class="alert alert-danger" style="display: none;"></div>
+
+            <button type="submit" class="btn btn-primary btn-block" style="padding: 13px; font-size: 1rem;">
+              🔐 Sign In &amp; Enter Portal →
+            </button>
+          </form>
+        </div>
+
+        <!-- MODE B: Mobile Number OTP Authentication Form -->
+        <div id="login-otp-form-block" style="display: none;">
+          <form onsubmit="event.preventDefault(); doLogin();" autocomplete="off">
+            <div class="form-group">
+              <label for="login-otp-phone">Mobile Phone Number</label>
+              <div class="phone-input-with-action">
+                <div class="phone-input-group">
+                  <span class="phone-prefix-pill">🇮🇳 +91</span>
+                  <input type="tel" id="login-otp-phone" maxlength="10" placeholder="10-digit mobile number"
+                    value="9876543210">
+                </div>
+                <button type="button" class="btn-send-otp" id="btn-login-send-otp" onclick="sendLoginOTP()">
+                  📲 Send OTP
+                </button>
+              </div>
+              <span class="text-xs text-muted" style="margin-top: 4px; display: block;">
+                A 6-digit OTP will be simulated and sent to this mobile number.
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="login-otp-code">6-Digit Verification Code</label>
+              <input type="text" id="login-otp-code" class="otp-code-input" maxlength="6" placeholder="• • • • • •"
+                autocomplete="one-time-code">
+              <div class="otp-resend-row">
+                <span>Didn't receive code?</span>
+                <button type="button" class="otp-resend-link" id="btn-resend-login-otp" onclick="sendLoginOTP()">
+                  Resend OTP <span id="login-otp-timer"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Dynamic Error Feedback Banner (shared) -->
+            <div id="login-otp-error-message" class="alert alert-danger" style="display: none;"></div>
+
+            <button type="submit" class="btn btn-primary btn-block" style="padding: 13px; font-size: 1rem;">
+              📱 Verify OTP &amp; Sign In →
+            </button>
+          </form>
+        </div>
+
+        <!-- Quick Demo Fill Helpers for College Presentation -->
+        <div class="auth-divider-with-text">
+          <span>Quick Demo Testing</span>
+        </div>
+        <div class="auth-demo-grid">
+          <button type="button" class="btn-demo-quick" onclick="quickFillDemo('manager', 'password')">
+            <strong>👔 Manager (Password)</strong>
+            <span>mayank / admin123</span>
+          </button>
+          <button type="button" class="btn-demo-quick" onclick="quickFillDemo('customer', 'otp')">
+            <strong>📱 Customer (OTP)</strong>
+            <span>Phone: 9876543210</span>
+          </button>
+        </div>
+
+        <!-- Navigation Link to Registration -->
+        <div class="auth-navigation-row"
+          style="justify-content: center; margin-top: 20px; padding-top: 14px; border-top: 1px solid #e2e8f0;">
+          <span>New to Mayank Sahu Store? </span>
+          <a href="javascript:void(0)" class="auth-nav-link" style="margin-left: 6px;"
+            onclick="switchAuthView('register')">
+            Create an Account →
+          </a>
+        </div>
+
+        <!-- Demo Credentials Guide -->
+        <div id="login-role-hint" class="login-demo-helper-box" style="margin-top: 14px;">
+          <strong>Manager Access:</strong> Username: <code>mayank</code> | Password: <code>admin123</code>
+        </div>
+      </div>
+
+      <!-- ======================================================================
+           VIEW 2: REGISTRATION PAGE (Customer Registration with Mobile Verification)
+           ====================================================================== -->
+      <div id="auth-view-register" class="auth-view">
+        <div style="text-align: center; margin-bottom: 18px;">
+          <h2 style="font-size: 1.25rem; color: var(--neutral-dark);">Create Customer Account</h2>
+          <p style="font-size: 0.85rem; color: #64748b;">Join Mayank Sahu Mobile Store with verified mobile access</p>
+        </div>
+
+        <!-- Dynamic Error Feedback Banner -->
+        <div id="reg-error-message" class="alert alert-danger" style="display: none;"></div>
+
+        <form onsubmit="event.preventDefault(); doRegister();" autocomplete="off">
+          <div class="form-group">
+            <label for="reg-fullname">Full Name *</label>
+            <input type="text" id="reg-fullname" placeholder="e.g. Amit Kumar Sharma" required>
+          </div>
+
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <label for="reg-phone" style="margin-bottom: 0;">Mobile Phone Number *</label>
+              <span id="reg-phone-status" style="font-size: 0.8rem; color: #64748b;">Verification Required</span>
+            </div>
+            <div class="phone-input-with-action">
+              <div class="phone-input-group">
+                <span class="phone-prefix-pill">🇮🇳 +91</span>
+                <input type="tel" id="reg-phone" maxlength="10" placeholder="10-digit mobile number" required>
+              </div>
+              <button type="button" class="btn-send-otp" id="btn-reg-send-otp" onclick="sendRegisterOTP()">
+                📲 Send OTP
+              </button>
+            </div>
+            <span class="text-xs text-muted" style="margin-top: 4px; display: block;">
+              Click 'Send OTP' to verify this mobile number before registering.
+            </span>
+          </div>
+
+          <!-- Dynamic OTP Verification Panel (Expands when OTP is sent) -->
+          <div id="reg-otp-panel" class="otp-verification-panel" style="display: none;">
+            <label for="reg-otp-code"
+              style="font-size: 0.82rem; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">
+              Enter 6-Digit SMS Verification Code:
+            </label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="reg-otp-code" class="otp-code-input" maxlength="6" placeholder="• • • • • •"
+                autocomplete="one-time-code" style="flex: 1;">
+              <button type="button" class="btn btn-primary" onclick="verifyRegisterOTP()"
+                style="padding: 0 16px; font-size: 0.85rem; font-weight: 600;">
+                Verify
+              </button>
+            </div>
+            <div class="otp-resend-row">
+              <span>Code expires in 5 minutes</span>
+              <button type="button" class="otp-resend-link" id="btn-resend-reg-otp" onclick="sendRegisterOTP()">
+                Resend OTP <span id="reg-otp-timer"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-email">Email Address (Optional)</label>
+            <input type="email" id="reg-email" placeholder="e.g. amit.sharma@example.com">
+          </div>
+
+          <div class="form-group">
+            <label for="reg-password">Create Password *</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="reg-password" placeholder="At least 6 characters" required
+                oninput="checkPasswordStrength(this.value, 'reg-password-fill', 'reg-password-label')">
+              <button type="button" class="password-toggle-btn" title="Toggle password visibility"
+                onclick="togglePasswordVisibility('reg-password', this)">
+                👁️
+              </button>
+            </div>
+            <div class="password-strength-container">
+              <div class="password-strength-bar">
+                <div id="reg-password-fill" class="password-strength-fill"></div>
+              </div>
+              <div id="reg-password-label" class="password-strength-label">
+                <span>Enter at least 6 characters</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-confirm-password">Confirm Password *</label>
+            <div class="password-input-wrapper">
+              <input type="password" id="reg-confirm-password" placeholder="Re-enter password" required>
+              <button type="button" class="password-toggle-btn" title="Toggle password visibility"
+                onclick="togglePasswordVisibility('reg-confirm-password', this)">
+                👁️
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block"
+            style="padding: 13px; font-size: 1rem; margin-top: 10px;">
+            ✨ Complete Registration &amp; Sign In →
+          </button>
+        </form>
+
+        <div class="auth-navigation-row" style="justify-content: center; margin-top: 16px;">
+          <span>Already have an account? </span>
+          <a href="javascript:void(0)" class="auth-nav-link" style="margin-left: 6px;"
+            onclick="switchAuthView('login')">
+            Back to Sign In
+          </a>
+        </div>
+      </div>
+
+      <!-- ======================================================================
+           VIEW 3: FORGOT PASSWORD PAGE (3-Step Mobile OTP Recovery Wizard)
+           ====================================================================== -->
+      <div id="auth-view-forgot" class="auth-view">
+        <div style="text-align: center; margin-bottom: 16px;">
+          <h2 style="font-size: 1.25rem; color: var(--neutral-dark);">Reset Password</h2>
+          <p style="font-size: 0.85rem; color: #64748b;">Recover account access via your registered mobile number</p>
+        </div>
+
+        <!-- 3-Step Wizard Indicator -->
+        <div class="forgot-step-indicator">
+          <div class="step-dot active" id="forgot-dot-1">1</div>
+          <div class="step-divider-line" id="forgot-line-1"></div>
+          <div class="step-dot" id="forgot-dot-2">2</div>
+          <div class="step-divider-line" id="forgot-line-2"></div>
+          <div class="step-dot" id="forgot-dot-3">3</div>
+        </div>
+
+        <!-- Dynamic Error Feedback Banner -->
+        <div id="forgot-error-message" class="alert alert-danger" style="display: none;"></div>
+
+        <!-- STEP 1: Enter Mobile Number -->
+        <div id="forgot-step-1">
+          <form onsubmit="event.preventDefault(); sendForgotOTP();" autocomplete="off">
+            <div class="form-group">
+              <label for="forgot-phone">Registered Mobile Phone Number</label>
+              <div class="phone-input-group">
+                <span class="phone-prefix-pill">🇮🇳 +91</span>
+                <input type="tel" id="forgot-phone" maxlength="10" placeholder="e.g. 9876543210" required>
+              </div>
+              <span class="text-xs text-muted" style="margin-top: 4px; display: block;">
+                We will send a 6-digit recovery OTP code to this mobile number.
+              </span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" style="padding: 13px; font-size: 0.95rem;">
+              📲 Send Password Reset OTP →
+            </button>
+          </form>
+        </div>
+
+        <!-- STEP 2: Verify 6-digit OTP Code -->
+        <div id="forgot-step-2" style="display: none;">
+          <form onsubmit="event.preventDefault(); verifyForgotOTP();" autocomplete="off">
+            <div class="form-group">
+              <label for="forgot-otp-code">
+                Enter Verification Code sent to <strong id="forgot-sent-phone-label">+91 ••••• •••••</strong>
+              </label>
+              <input type="text" id="forgot-otp-code" class="otp-code-input" maxlength="6" placeholder="• • • • • •"
+                autocomplete="one-time-code" required>
+              <div class="otp-resend-row">
+                <span>Code valid for 5 minutes</span>
+                <button type="button" class="otp-resend-link" id="btn-resend-forgot-otp" onclick="sendForgotOTP()">
+                  Resend OTP <span id="forgot-otp-timer"></span>
+                </button>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+              <button type="button" class="btn btn-secondary" onclick="switchForgotStep(1)" style="flex: 1;">
+                ← Change Number
+              </button>
+              <button type="submit" class="btn btn-primary" style="flex: 2;">
+                Verify Code →
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- STEP 3 Set New Password -->
+        <div id="forgot-step-3" style="display: none;">
+          <form onsubmit="event.preventDefault(); doResetPassword();" autocomplete="off">
+            <div class="form-group">
+              <label for="forgot-new-password">New Password</label>
+              <div class="password-input-wrapper">
+                <input type="password" id="forgot-new-password" placeholder="At least 6 characters" required
+                  oninput="checkPasswordStrength(this.value, 'forgot-password-fill', 'forgot-password-label')">
+                <button type="button" class="password-toggle-btn" title="Toggle password visibility"
+                  onclick="togglePasswordVisibility('forgot-new-password', this)">
+                  👁️
+                </button>
+              </div>
+              <div class="password-strength-container">
+                <div class="password-strength-bar">
+                  <div id="forgot-password-fill" class="password-strength-fill"></div>
+                </div>
+                <div id="forgot-password-label" class="password-strength-label">
+                  <span>Enter new password</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="forgot-confirm-password">Confirm New Password</label>
+              <div class="password-input-wrapper">
+                <input type="password" id="forgot-confirm-password" placeholder="Re-enter new password" required>
+                <button type="button" class="password-toggle-btn" title="Toggle password visibility"
+                  onclick="togglePasswordVisibility('forgot-confirm-password', this)">
+                  👁️
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" style="padding: 13px; font-size: 0.95rem;">
+              🔒 Save New Password &amp; Sign In →
+            </button>
+          </form>
+        </div>
+
+        <div class="auth-navigation-row" style="justify-content: center; margin-top: 16px;">
+          <a href="javascript:void(0)" class="auth-nav-link" onclick="switchAuthView('login')">
+            ← Back to Login Screen
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Smartphone Simulated SMS Push Notification Toast -->
+  <div id="sms-notification-toast"></div>
+
+  <!-- ==============================================================================
+       3. STORE MANAGER PORTAL SCREEN
+       ============================================================================== -->
+  <main id="screen-manager" class="app-screen">
+
+    <!-- CRITICAL: Low Stock Warning (< 3 units) injected automatically upon login -->
+    <div id="mgr-low-stock-alert"></div>
+
+    <!-- Manager Workspace Tabs -->
+    <div class="workspace-nav-bar">
+      <button class="nav-pill-btn mgr-nav-pill active" data-tab="dashboard" onclick="switchManagerTab('dashboard')">
+        📊 Overview Dashboard
+      </button>
+      <button class="nav-pill-btn mgr-nav-pill" data-tab="mobiles" onclick="switchManagerTab('mobiles')">
+        📱 Mobile Catalog &amp; Stock
+      </button>
+      <button class="nav-pill-btn mgr-nav-pill" data-tab="orders" onclick="switchManagerTab('orders')">
+        📦 Distributor Restocking
+      </button>
+      <button class="nav-pill-btn mgr-nav-pill" data-tab="promotions" onclick="switchManagerTab('promotions')">
+        🎁 Promotional Offers
+      </button>
+      <button class="nav-pill-btn mgr-nav-pill" data-tab="statistics" onclick="switchManagerTab('statistics')">
+        📈 Sales Analytics
+      </button>
+      <button class="nav-pill-btn mgr-nav-pill" data-tab="database" onclick="switchManagerTab('database')">
+        🗄️ Database Management
+      </button>
+    </div>
+
+    <!-- TAB 1: OVERVIEW DASHBOARD -->
+    <section id="mgr-tab-dashboard" class="manager-tab-content active">
+      <div class="kpi-grid" id="mgr-kpi-grid"></div>
+
+      <!-- CRITICAL REQUIREMENT: Incoming Customer Order Requests Section -->
+      <div class="card" id="mgr-incoming-requests-card" style="border: 2px solid var(--primary-blue);">
+        <div class="card-title-row">
+          <h2>🔔 Incoming Customer Order Requests</h2>
+          <div id="mgr-pending-orders-badge-wrap"></div>
+        </div>
+        <p class="text-sm text-muted" style="margin-bottom: 14px;">
+          Live purchase orders placed from the Customer Portal. Store Manager Mayank Sahu can approve to dispatch or
+          reject to restore inventory stock.
+        </p>
+        <div class="table-responsive-box">
+          <table>
+            <thead>
+              <tr>
+                <th>Request #</th>
+                <th>Customer &amp; Contact</th>
+                <th>Requested Smartphone</th>
+                <th>Qty</th>
+                <th>Order Value</th>
+                <th>Timestamp</th>
+                <th>Status</th>
+                <th>Manager Decision</th>
+              </tr>
+            </thead>
+            <tbody id="mgr-customer-orders-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent Customer Transactions Table -->
+      <div class="card">
+        <div class="card-title-row">
+          <h2>📋 Recent Completed Customer Transactions (Mayank Sahu Store)</h2>
+          <span class="text-sm text-muted">Latest sales entries</span>
+        </div>
+        <div class="table-responsive-box">
+          <table>
+            <thead>
+              <tr>
+                <th>Invoice #</th>
+                <th>Customer Name</th>
+                <th>Purchased Model</th>
+                <th>Qty</th>
+                <th>Total (inc. GST)</th>
+                <th>Sale Date</th>
+              </tr>
+            </thead>
+            <tbody id="mgr-recent-sales-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: MOBILE CATALOG & INVENTORY CRUD -->
+    <section id="mgr-tab-mobiles" class="manager-tab-content">
+      <!-- Add / Edit Mobile Form -->
+      <div class="card" id="mobile-entry-card">
+        <div class="card-title-row">
+          <h2 id="mobile-form-title">➕ Add / Maintain Mobile Data</h2>
+          <span class="text-sm text-muted">Manage smartphone specifications, pricing &amp; store stock</span>
+        </div>
+
+        <input type="hidden" id="m-edit-id">
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="m-model">Smartphone Model Name *</label>
+            <input type="text" id="m-model" placeholder="e.g. Samsung Galaxy S25 Ultra">
+          </div>
+          <div class="form-group">
+            <label for="m-brand">Brand / Manufacturer *</label>
+            <input type="text" id="m-brand" placeholder="e.g. Samsung, Apple, OnePlus">
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="m-price">Store Selling Price (₹) *</label>
+            <input type="number" id="m-price" placeholder="e.g. 74999" min="1000">
+          </div>
+          <div class="form-group">
+            <label for="m-qty">Available Stock Quantity *</label>
+            <input type="number" id="m-qty" placeholder="e.g. 10" min="0">
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="m-ram">RAM Capacity (GB)</label>
+            <input type="number" id="m-ram" placeholder="e.g. 12" min="1">
+          </div>
+          <div class="form-group">
+            <label for="m-storage">Internal Storage (GB)</label>
+            <input type="number" id="m-storage" placeholder="e.g. 256" min="16">
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="m-camera">Primary Camera (MP)</label>
+            <input type="number" id="m-camera" placeholder="e.g. 50" min="8">
+          </div>
+          <div class="form-group">
+            <label for="m-battery">Battery Capacity (mAh)</label>
+            <input type="number" id="m-battery" placeholder="e.g. 5000" min="1000">
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="m-display">Display Size (Inches)</label>
+            <input type="number" id="m-display" step="0.1" placeholder="e.g. 6.7" min="4">
+          </div>
+          <div class="form-group">
+            <label for="m-os">Operating System</label>
+            <input type="text" id="m-os" placeholder="e.g. Android 14, iOS 17">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="m-features">Key Hardware &amp; Software Highlights</label>
+          <textarea id="m-features" rows="2"
+            placeholder="e.g. 5G support, 120Hz LTPO AMOLED, 80W Fast Charge, OIS..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 10px;">
+          <button type="button" class="btn btn-success" id="btn-save-mobile" onclick="handleSaveMobileForm()">
+            💾 Save to Catalog
+          </button>
+          <button type="button" class="btn btn-outline" onclick="resetMobileForm()">
+            ✕ Clear Form
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Inventory Listing -->
+      <div class="card">
+        <div class="card-title-row">
+          <h2>📱 Current Store Stock Inventory</h2>
+          <input type="text" class="search-input-field" placeholder="🔍 Search by model, brand, OS..."
+            oninput="filterManagerMobiles(this.value)">
+        </div>
+
+        <div class="table-responsive-box">
+          <table>
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Brand</th>
+                <th>Price</th>
+                <th>RAM</th>
+                <th>Storage</th>
+                <th>Camera</th>
+                <th>Battery</th>
+                <th>Inventory Stock</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="mgr-inventory-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: DISTRIBUTOR PURCHASE ORDERS & STOCK REPLENISHMENT -->
+    <section id="mgr-tab-orders" class="manager-tab-content">
+      <div class="card">
+        <div class="card-title-row">
+          <h2>📦 Place Order with Distributors</h2>
+          <span class="text-sm text-muted">Procure new smartphone batches to replenish store inventory</span>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="ord-mobile-select">Select Smartphone Model *</label>
+            <select id="ord-mobile-select"></select>
+          </div>
+          <div class="form-group">
+            <label for="ord-qty-input">Quantity to Procure *</label>
+            <input type="number" id="ord-qty-input" placeholder="e.g. 20" min="1">
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="ord-distributor-input">Authorized Distributor Name *</label>
+            <input type="text" id="ord-distributor-input" placeholder="e.g. Apex Telecom Logistics Ltd.">
+          </div>
+          <div class="form-group">
+            <label for="ord-date-input">Expected Delivery Date *</label>
+            <input type="date" id="ord-date-input">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="ord-notes-input">Purchase Order Notes &amp; Dispatch Instructions</label>
+          <textarea id="ord-notes-input" rows="2"
+            placeholder="e.g. Urgent festive season requirement, fragile shipment"></textarea>
+        </div>
+
+        <button type="button" class="btn btn-primary" onclick="submitDistributorOrder()">
+          📤 Dispatch Purchase Order
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-title-row">
+          <h2>📋 Distributor Order &amp; Delivery Tracking</h2>
+          <span class="text-sm text-muted">Confirming delivery automatically updates store inventory stock</span>
+        </div>
+        <div class="table-responsive-box">
+          <table>
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Smartphone Model</th>
+                <th>Procured Qty</th>
+                <th>Distributor</th>
+                <th>Expected Date</th>
+                <th>Status</th>
+                <th>Inventory Action</th>
+              </tr>
+            </thead>
+            <tbody id="mgr-orders-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: PROMOTIONS -->
+    <section id="mgr-tab-promotions" class="manager-tab-content">
+      <div class="card">
+        <div class="card-title-row">
+          <h2>🎁 Create Promotional Discount Campaign</h2>
+          <span class="text-sm text-muted">Active promotions are automatically highlighted on the customer welcome
+            screen</span>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="promo-title-input">Promotion Campaign Title *</label>
+            <input type="text" id="promo-title-input" placeholder="e.g. Monsoon Flash Sale 🌧️">
+          </div>
+          <div class="form-group">
+            <label for="promo-mobile-select">Applicable Smartphone Scope</label>
+            <select id="promo-mobile-select"></select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="promo-discount-input">Discount Percentage (1% - 95%) *</label>
+            <input type="number" id="promo-discount-input" placeholder="e.g. 15" min="1" max="95">
+          </div>
+          <div class="form-group">
+            <label for="promo-valid-input">Offer Valid Until *</label>
+            <input type="date" id="promo-valid-input">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="promo-desc-input">Offer Description &amp; Highlights *</label>
+          <textarea id="promo-desc-input" rows="2"
+            placeholder="Highlight why the customer should buy now..."></textarea>
+        </div>
+
+        <button type="button" class="btn btn-primary" onclick="submitNewPromotion()">
+          🎉 Publish &amp; Activate Promotion
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-title-row">
+          <h2>📢 Active Promotional Campaigns</h2>
+          <span class="text-sm text-muted">Manage active deals</span>
+        </div>
+        <div class="table-responsive-box">
+          <table>
+            <thead>
+              <tr>
+                <th>Campaign Title</th>
+                <th>Scope</th>
+                <th>Discount</th>
+                <th>Valid Until</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="mgr-promotions-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: SALES STATISTICS & ANALYTICS -->
+    <section id="mgr-tab-statistics" class="manager-tab-content">
+      <div class="card">
+        <div class="card-title-row">
+          <h2>📈 Sales Analytics Filter</h2>
+          <span class="text-sm text-muted">Slice sales by Model, Month or Brand</span>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="stat-group-filter">Group Sales Performance By:</label>
+            <select id="stat-group-filter" onchange="renderSalesStatistics()">
+              <option value="model">Mobile Model Name</option>
+              <option value="month">Month &amp; Year</option>
+              <option value="brand">Brand / Manufacturer</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="stat-year-filter">Filter Sales Year:</label>
+            <select id="stat-year-filter" onchange="renderSalesStatistics()"></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistical KPI Summary -->
+      <div class="kpi-grid" id="stat-kpi-summary"></div>
+
+      <!-- Charts Row -->
+      <div class="analytics-chart-grid">
+        <div class="card">
+          <div class="card-title-row">
+            <h3>📊 Sales Comparison (<span id="stat-chart-category-label">Category</span>)</h3>
+          </div>
+          <div id="stat-bar-chart-container" class="bar-chart-visual"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title-row">
+            <h3>🍩 Revenue Share Distribution</h3>
+          </div>
+          <div class="pie-chart-wrap">
+            <canvas id="stat-donut-canvas" width="220" height="220"></canvas>
+            <div id="stat-donut-legend" class="donut-legend-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistical Breakdown Table -->
+      <div class="card">
+        <div class="card-title-row">
+          <h2>📋 Detailed Sales Breakdown</h2>
+        </div>
+        <div class="table-responsive-box">
+          <table>
+            <thead>
+              <tr>
+                <th id="stat-table-header-col">Category</th>
+                <th>Total Units Sold</th>
+                <th>Total Revenue Generated</th>
+                <th>Average Price per Handset</th>
+              </tr>
+            </thead>
+            <tbody id="stat-breakdown-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 6: DATABASE MANAGEMENT & BACKUP CONSOLE -->
+    <section id="mgr-tab-database" class="manager-tab-content">
+      <div class="card">
+        <div class="card-title-row">
+          <h2>🗄️ Database Engine &amp; Health Overview</h2>
+          <span class="text-sm text-muted">Persistent LocalStorage Database Manager</span>
+        </div>
+        <div id="mgr-db-metrics-card"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title-row">
+          <h2>⚙️ Database Maintenance &amp; Backup Operations</h2>
+          <span class="text-sm text-muted">Download JSON snapshots, restore from backups, or reset to factory
+            defaults</span>
+        </div>
+        <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
+          <button class="btn btn-primary" onclick="DBManager.exportDatabaseToFile()">
+            📥 Download Database Backup (.JSON)
+          </button>
+          <label class="btn btn-outline" style="cursor: pointer; margin-bottom: 0;">
+            📤 Restore Database from JSON
+            <input type="file" accept=".json" style="display: none;" onchange="handleDatabaseJsonUpload(this)">
+          </label>
+          <button class="btn btn-danger" onclick="triggerDatabaseFactoryReset()">
+            🔄 Reset Database to Clean Defaults
+          </button>
+        </div>
+      </div>
+
+      <!-- Raw Database Tables Viewer -->
+      <div class="card">
+        <div class="workspace-nav-bar" style="border-bottom: 1px solid #cbd5e1; margin-bottom: 16px;">
+          <button class="nav-pill-btn db-table-pill active" data-table="sales" onclick="showRawDatabaseTable('sales')">
+            🛒 Customer Orders Table (sales)
+          </button>
+          <button class="nav-pill-btn db-table-pill" data-table="mobiles" onclick="showRawDatabaseTable('mobiles')">
+            📱 Smartphone Catalog Table (mobiles)
+          </button>
+          <button class="nav-pill-btn db-table-pill" data-table="orders" onclick="showRawDatabaseTable('orders')">
+            📦 Distributor Orders Table (orders)
+          </button>
+          <button class="nav-pill-btn db-table-pill" data-table="promotions"
+            onclick="showRawDatabaseTable('promotions')">
+            🎁 Promotions Table (promotions)
+          </button>
+        </div>
+        <div id="db-raw-table-viewer"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==============================================================================
+       4. CUSTOMER SHOPPING & PURCHASING PORTAL
+       ============================================================================== -->
+  <main id="screen-customer" class="app-screen">
+
+    <!-- Welcome Promotional Offers Banner Carousel -->
+    <div id="cust-promotions-banner"></div>
+
+    <!-- Customer Workspace Navigation -->
+    <div class="workspace-nav-bar">
+      <button class="nav-pill-btn cust-nav-pill active" data-tab="browse" onclick="switchCustomerTab('browse')">
+        📱 Browse Smartphones
+      </button>
+      <button class="nav-pill-btn cust-nav-pill" data-tab="compare" onclick="switchCustomerTab('compare')">
+        ⚖️ Compare Devices
+      </button>
+      <button class="nav-pill-btn cust-nav-pill" data-tab="buy" onclick="switchCustomerTab('buy')">
+        🛒 Buy &amp; Checkout
+      </button>
+      <button class="nav-pill-btn cust-nav-pill" data-tab="bill" onclick="switchCustomerTab('bill')">
+        🧾 My Official Invoice
+      </button>
+    </div>
+
+    <!-- TAB 1: BROWSE CATALOG -->
+    <section id="cust-tab-browse" class="customer-tab-content active">
+      <div class="catalog-toolbar-row">
+        <input type="text" class="search-input-field" placeholder="🔍 Search by name, brand, features..."
+          oninput="filterCustomerCatalog(this.value)">
+
+        <select class="search-input-field" style="max-width: 220px;" onchange="sortCustomerCatalog(this.value)">
+          <option value="">Sort Smartphones By...</option>
+          <option value="price_asc">Price: Low to High ↑</option>
+          <option value="price_desc">Price: High to Low ↓</option>
+          <option value="name">Model Name: A to Z</option>
+        </select>
+      </div>
+
+      <div class="product-grid" id="cust-catalog-grid"></div>
+    </section>
+
+    <!-- TAB 2: COMPARE SMARTPHONES -->
+    <section id="cust-tab-compare" class="customer-tab-content">
+      <div class="card">
+        <div class="card-title-row">
+          <h2>⚖️ Multi-Mobile Specification Comparison Matrix</h2>
+          <span class="text-sm text-muted">Evaluate device specifications side by side</span>
+        </div>
+
+        <div class="criteria-selector-box">
+          <label style="font-size: 0.85rem; font-weight: 700; color: #475569;">
+            Select Comparison Criteria:
+          </label>
+          <div class="criteria-chips-container">
+            <span class="criteria-chip active" data-criterion="price" onclick="toggleCriteriaChip(this)">Price</span>
+            <span class="criteria-chip active" data-criterion="ram" onclick="toggleCriteriaChip(this)">RAM Memory</span>
+            <span class="criteria-chip active" data-criterion="storage" onclick="toggleCriteriaChip(this)">Internal
+              Storage</span>
+            <span class="criteria-chip active" data-criterion="camera" onclick="toggleCriteriaChip(this)">Camera
+              Optics</span>
+            <span class="criteria-chip active" data-criterion="battery" onclick="toggleCriteriaChip(this)">Battery
+              Life</span>
+            <span class="criteria-chip active" data-criterion="display" onclick="toggleCriteriaChip(this)">Display
+              Size</span>
+            <span class="criteria-chip active" data-criterion="os" onclick="toggleCriteriaChip(this)">Operating
+              System</span>
+          </div>
+        </div>
+
+        <div id="compare-empty-notice" class="alert alert-info">
+          <div class="alert-icon">ℹ️</div>
+          <div class="alert-content">
+            <strong>How to compare:</strong>
+            Go to the <strong>"Browse Smartphones"</strong> tab and tick the <strong>"Compare"</strong> checkbox on 2 to
+            4 devices.
+          </div>
+        </div>
+
+        <div id="compare-table-wrapper" class="table-responsive-box" style="display: none;">
+          <table class="compare-matrix-table">
+            <thead>
+              <tr id="compare-thead-row"></tr>
+            </thead>
+            <tbody id="compare-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: BUY / CHECKOUT -->
+    <section id="cust-tab-buy" class="customer-tab-content">
+      <div class="card">
+        <div class="card-title-row">
+          <h2>🛒 Purchase Smartphone &amp; Submit Order Request</h2>
+          <span class="text-sm text-muted">Real-time stock deduction, order forwarding to manager &amp; tax invoice
+            generation</span>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="buy-mobile-select">Choose Smartphone to Buy *</label>
+            <select id="buy-mobile-select" onchange="handleBuyMobileSelectChange()"></select>
+          </div>
+          <div class="form-group">
+            <label for="buy-qty-input">Purchase Quantity *</label>
+            <input type="number" id="buy-qty-input" value="1" min="1" oninput="calculateCustomerPurchaseTotal()">
+          </div>
+        </div>
+
+        <!-- Selected Device Specs Mini-Card -->
+        <div id="buy-selected-mobile-preview" class="card"
+          style="display: none; background: #f8fafc; border: 1.5px solid var(--primary-blue); padding: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 id="buy-preview-name" style="color: var(--neutral-dark); font-size: 1.1rem;"></h3>
+              <p id="buy-preview-specs" class="text-sm text-muted" style="margin-top: 4px;"></p>
+            </div>
+            <div style="text-align: right;">
+              <div id="buy-preview-price" style="font-size: 1.4rem; font-weight: 800; color: var(--primary-blue);">
+              </div>
+              <span id="buy-preview-stock" class="badge"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="buy-cust-name">Customer Full Name *</label>
+            <input type="text" id="buy-cust-name" placeholder="Enter your full name">
+          </div>
+          <div class="form-group">
+            <label for="buy-phone">Mobile Contact Number *</label>
+            <input type="tel" id="buy-phone" placeholder="e.g. 9876543210">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="buy-address">Delivery Address *</label>
+          <textarea id="buy-address" rows="2"
+            placeholder="Enter complete residential or office delivery address"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="buy-promo-select">Apply Available Promotional Offer</label>
+          <select id="buy-promo-select" onchange="calculateCustomerPurchaseTotal()"></select>
+        </div>
+
+        <!-- Grand Total Calculation Card -->
+        <div class="alert alert-info"
+          style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0;">
+          <div>
+            <strong style="font-size: 1rem;">Total Payable Amount:</strong>
+            <span class="text-xs text-muted block">Includes device base price, promotional discounts &amp; 18%
+              GST</span>
+          </div>
+          <div id="buy-calculated-grand-total" style="font-size: 1.6rem; font-weight: 800; color: #1e3a8a;">₹0</div>
+        </div>
+
+        <button type="button" class="btn btn-success btn-block" style="padding: 14px; font-size: 1rem;"
+          onclick="processCustomerPurchase()">
+          ✅ Confirm Purchase &amp; Submit Order Request →
+        </button>
+      </div>
+    </section>
+
+    <!-- TAB 4: OFFICIAL BILL / INVOICE -->
+    <section id="cust-tab-bill" class="customer-tab-content">
+      <!-- Empty Placeholder -->
+      <div id="cust-no-bill-placeholder" class="card" style="text-align: center; padding: 48px 20px;">
+        <div style="font-size: 3rem; margin-bottom: 12px;">🧾</div>
+        <h3 style="color: var(--neutral-dark); margin-bottom: 6px;">No Invoice Generated Yet</h3>
+        <p class="text-muted" style="margin-bottom: 16px;">
+          Purchase a smartphone from the store to generate your official bill receipt and forward your order to the
+          manager.
+        </p>
+        <button class="btn btn-primary" onclick="switchCustomerTab('browse')">Browse Store Mobiles</button>
+      </div>
+
+      <!-- Generated Bill Display Area -->
+      <div id="cust-bill-display-area" style="display: none;">
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 16px;">
+          <!-- CRITICAL REQUIREMENT: Customer can change ONLY their name, rest is read-only -->
+          <button class="btn btn-outline btn-sm" onclick="editCustomerBillNameOnly()">
+            ✏️ Edit Customer Name Only
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="window.print()">
+            🖨️ Print Invoice Receipt
+          </button>
+        </div>
+
+        <!-- Printable Receipt Layout -->
+        <div class="receipt-paper-container">
+          <div class="receipt-store-header">
+            <h2>📱 Mayank Sahu Mobile Store</h2>
+            <div class="receipt-store-sub">Official Tax Invoice &amp; Customer Sales Receipt</div>
+            <div class="text-xs text-muted">B-10, University Campus Road • GSTIN: 27AABCS1234F1Z5</div>
+          </div>
+
+          <div class="receipt-data-row">
+            <span>Invoice Number:</span>
+            <span id="bill-receipt-number" class="font-bold">-</span>
+          </div>
+          <div class="receipt-data-row">
+            <span>Order Request ID:</span>
+            <span id="bill-receipt-order-req" class="font-bold">-</span>
+          </div>
+          <div class="receipt-data-row">
+            <span>Date of Purchase:</span>
+            <span id="bill-receipt-date">-</span>
+          </div>
+          <div class="receipt-data-row">
+            <span>Order Processing Status:</span>
+            <span id="bill-receipt-status" class="badge badge-amber font-bold">-</span>
+          </div>
+
+          <!-- Customer Name: Highlighted as editable field -->
+          <div class="receipt-data-row receipt-editable-name-row">
+            <span>Customer Name (Editable):</span>
+            <div>
+              <span id="bill-receipt-customer-name" class="font-bold">-</span>
+              <span class="receipt-editable-badge"> [✏️ Editable]</span>
+            </div>
+          </div>
+
+          <!-- Strictly Read-Only Contact Fields -->
+          <div class="receipt-data-row">
+            <span>Contact Phone:</span>
+            <span id="bill-receipt-phone" class="text-muted">-</span>
+          </div>
+          <div class="receipt-data-row">
+            <span>Delivery Destination:</span>
+            <span id="bill-receipt-address" class="text-muted">-</span>
+          </div>
+
+          <hr class="receipt-divider">
+
+          <!-- Strictly Read-Only Device Specifications -->
+          <div class="receipt-data-row">
+            <span>Device Model:</span>
+            <span id="bill-receipt-model" class="font-bold">-</span>
+          </div>
+          <div class="receipt-data-row">
+            <span>Brand:</span>
+            <span id="bill-receipt-brand">-</span>
+          </div>
+          <div class="receipt-data-row">
+            <span>Specs (RAM/ROM/OS):</span>
+            <span id="bill-receipt-specs">-</span>
+          </div>
+          <div class="receipt-data-row">
+            <span>Purchased Quantity:</span>
+            <span id="bill-receipt-qty">-</span>
+          </div>
+
+          <hr class="receipt-divider">
+
+          <!-- Strictly Read-Only Pricing & Tax Fields -->
+          <div class="receipt-data-row">
+            <span>Base Unit Price:</span>
+            <span id="bill-receipt-unit-price">-</span>
+          </div>
+          <div class="receipt-data-row">
+            <span>Promotional Discount:</span>
+            <span id="bill-receipt-discount" style="color: var(--accent-green);">-</span>
+          </div>
+          <div class="receipt-data-row">
+            <span>Subtotal (Net):</span>
+            <span id="bill-receipt-subtotal">-</span>
+          </div>
+          <div class="receipt-data-row">
+            <span>GST Amount (18%):</span>
+            <span id="bill-receipt-gst">-</span>
+          </div>
+
+          <div class="receipt-data-row receipt-total-row">
+            <span>GRAND TOTAL:</span>
+            <span id="bill-receipt-grand-total">-</span>
+          </div>
+
+          <hr class="receipt-divider">
+          <div class="receipt-footer-thanks">
+            <p>Thank you for shopping at Mayank Sahu Mobile Store!</p>
+            <p class="text-xs text-muted" style="margin-top: 4px;">Your order request has been logged on the manager
+              dashboard for fulfillment.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==============================================================================
+       5. POPUP MODAL DIALOGS
+       ============================================================================== -->
+  <!-- Promotion Details Modal -->
+  <div id="modal-promo-details" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header-banner">
+        <h2 id="promo-modal-title">Promotion Title</h2>
+        <p id="promo-modal-subtitle" style="font-size: 0.9rem; opacity: 0.95;"></p>
+      </div>
+
+      <div id="promo-modal-body"></div>
+
+      <div class="modal-footer-actions">
+        <button class="btn btn-secondary" onclick="closeAllModals()">Close</button>
+        <button class="btn btn-success" onclick="proceedToBuyFromPromotion()">🛒 Buy Now With Offer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Full Specifications Modal -->
+  <div id="modal-mobile-details" class="modal-overlay">
+    <div class="modal-card">
+      <div class="card-title-row" style="margin-bottom: 0;">
+        <h2 id="mobile-modal-title">Smartphone Specifications</h2>
+        <button class="btn btn-sm btn-outline" onclick="closeAllModals()">✕</button>
+      </div>
+
+      <div id="mobile-modal-body"></div>
+
+      <div class="modal-footer-actions">
+        <button class="btn btn-secondary" onclick="closeAllModals()">Close</button>
+        <button class="btn btn-success" onclick="buyFromDetailsModal()">🛒 Buy This Smartphone</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manager Customer Invoice Review Modal -->
+  <div id="modal-manager-invoice-view" class="modal-overlay">
+    <div class="modal-card" style="max-width: 650px;">
+      <div class="card-title-row" style="margin-bottom: 0;">
+        <h2>🧾 Customer Invoice Review</h2>
+        <button class="btn btn-sm btn-outline" onclick="closeAllModals()">✕</button>
+      </div>
+
+      <div id="manager-invoice-modal-body"></div>
+
+      <div class="modal-footer-actions">
+        <button class="btn btn-secondary" onclick="closeAllModals()">Close Review</button>
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Print Receipt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==============================================================================
+       6. COLLEGE PROJECT FOOTER
+       ============================================================================== -->
+  <footer class="portal-footer">
+    <p>
+      <strong>Mayank Sahu Mobile Store</strong> — Intelligent Sales, Inventory &amp; Billing Management System
+    </p>
+    <p class="text-xs" style="margin-top: 4px; color: #94a3b8;">
+      Designed, Architected &amp; Developed by: <strong>Mayank Sahu</strong>
+    </p>
+  </footer>
+
+  <!-- ==============================================================================
+       7. JAVASCRIPT MODULE IMPORTS (Structured in Dependency Order)
+       ============================================================================== -->
+  <script src="js/data.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/manager.js"></script>
+  <script src="js/customer.js"></script>
+
+  <!-- Backdrop click to close modals -->
+  <script>
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', event => {
+        if (event.target === overlay) {
+          closeAllModals();
+        }
+      });
+    });
+  </script>
+
+</body>
+
+</html>
